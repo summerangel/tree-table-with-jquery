@@ -1,0 +1,319 @@
+(function ($) {
+    var items = [
+        {
+            id: 1,
+            priority: 1,
+            from: 'reacttreetable@simple.com',
+            subject: 'Lorem Ipsum is simply dummy text of the printing',
+            sentDate: '01/01/2019'
+        },
+        {
+            id: 2,
+            priority: 2,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 1
+        },
+        {
+            id: 3,
+            priority: 3,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 1
+        },
+        {
+            id: 4,
+            priority: 4,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 3
+        },
+        {
+            id: 5,
+            priority: 5,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019'
+        },
+        {
+            id: 6,
+            priority: 6,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019'
+        },
+        {
+            id: 7,
+            priority: 7,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 3
+        },
+        {
+            id: 8,
+            priority: 8,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 3
+        },
+        {
+            id: 9,
+            priority: 9,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 3
+        },
+        {
+            id: 10,
+            priority: 10,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 8
+        },
+        {
+            id: 11,
+            priority: 11,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 8
+        },
+        {
+            id: 12,
+            priority: 12,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 10
+        },
+        {
+            id: 13,
+            priority: 13,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 5
+        },
+        {
+            id: 17,
+            priority: 13,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 13
+        },
+        {
+            id: 18,
+            priority: 13,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 13
+        },
+        {
+            id: 19,
+            priority: 13,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 13
+        },
+        {
+            id: 14,
+            priority: 14,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 5
+        },
+        {
+            id: 15,
+            priority: 14,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 5
+        },{
+            id: 16,
+            priority: 14,
+            from: 'reacttreetable@simple.com',
+            subject: 'It is a long established fact that a reader will be distracted',
+            sentDate: '01/01/2019',
+            parentId: 5
+        }];
+
+    function flatListToTree(items) {
+        const getChild = (item, level, allLevel) => {
+            return items.filter(v => v.parentId === item.id)
+                .map(v => {
+                        const temp = {
+                            ...v,
+                            level,
+                            children: getChild(v, level + 1, level === 0 ? v.id : `${allLevel}_${v.id}`),
+                            partLevel: level === 0 ? v.id : `${v.parentId}_${v.id}`,
+                            ...(level === 0 ? {
+                                allLevel: v.id
+                            } : {
+                                allLevel: [allLevel, v.id].join('_')
+                            }),
+                        };
+                        return [temp].concat(...temp.children);
+                    }
+                );
+        };
+
+        return [].concat(...getChild({ id: undefined }, 0, undefined))
+    };
+
+    $(document.body).delegate({
+        '.expand': function () {
+            var level = $(this).attr('data-level');
+            var partLevel = $(this).attr('data-part-level');
+            var allLevel = $(this).attr('data-all-level');
+            var isOpen = $(this).attr('data-is-open');
+            var trsDiv = $('.tree-table').find('tbody tr');
+            var trsArray = $(trsDiv);
+            if (isOpen === '1') {
+                for(var i = 0;i < trsArray.length - 1; i++) {
+                    var tempTr = $(trsArray[i]);
+                    var trLevel = tempTr.attr('data-level');
+                    var trPartLevel = tempTr.attr('data-part-level');
+                    var trAllLevel = tempTr.attr('data-all-level');
+                    var contain = trAllLevel.split('_')[Number(level)]; // 通过循环出来的tr的all_level获取选中等级的id
+                    var curr = partLevel.split('_'); // 通过获取选中的part_level的最后一个元素获取选中等级的id
+                    // 判断是否相等，
+                    if (contain && contain === curr[curr.length - 1] && partLevel !== trPartLevel) {
+                        tempTr.removeClass('show');
+                        tempTr.addClass('hidden');
+                    }
+                }
+                $(this).text('+');
+                $(this).attr('data-is-open', '0');
+            } else {
+                for(var i = 0;i < trsArray.length - 1; i++) {
+                    var tempTr = $(trsArray[i]);
+                    var trLevel = tempTr.attr('data-level');
+                    var trPartLevel = tempTr.attr('data-part-level');
+                    var trAllLevel = tempTr.attr('data-all-level');
+                    var contain = trAllLevel.split('_')[Number(level)]; // 通过循环出来的tr的all_level获取选中等级的id
+                    var curr = partLevel.split('_'); // 通过获取选中的part_level的最后一个元素获取选中等级的id
+                    // 判断是否相等，
+                    if (contain && contain === curr[curr.length - 1] && Number(trLevel) > (Number(level))) {
+                        var span = $(tempTr.children()[0].children[Number(trLevel)]);
+                        var isOpen = $(span).attr('data-is-open');
+                        tempTr.removeClass('hidden');
+                        tempTr.addClass('show');
+                        if (isOpen) {
+                            $(span).text('-');
+                        }
+                    }
+                }
+                $(this).text('-');
+                $(this).attr('data-is-open', '1');
+            }
+
+        }
+    })
+
+    function createRows() {
+        var fragments = document.createDocumentFragment();
+        var opts = flatListToTree(items);
+        for (var i = 0; i < opts.length; i++) {
+            var item = opts[i];
+            var trEle = document.createElement('tr');
+            $(trEle).attr('data-part-level', item.partLevel);
+            $(trEle).attr('data-all-level', item.allLevel);
+            $(trEle).attr('data-level', item.level);
+            var tdEle1 = document.createElement('td');
+            var spanEle = document.createElement('span');
+            if (item.level === 0 && item.children && item.children.length > 0) {
+                $(spanEle).addClass('tree-table-space-block btn-toggle expand');
+                $(spanEle).attr('data-part-level', item.partLevel);
+                $(spanEle).attr('data-all-level', item.allLevel);
+                $(spanEle).attr('data-level', item.level);
+                $(spanEle).attr('data-is-open', '1');
+                $(spanEle).text('-');
+                $(tdEle1).append(spanEle);
+            } else if(item.level > 0) {
+                for (var j = 0; j < item.level; j++) {
+                    var spanEle2 = document.createElement('span');
+                    var iEle = document.createElement('i');
+                    $(spanEle2).addClass('tree-table-space-block');
+                    $(spanEle2).append(iEle);
+                    $(tdEle1).append(spanEle2);
+                }
+            } else if (!item.children || item.children.length === 0) {
+                var spanEle3 = document.createElement('span');
+                var iEle2 = document.createElement('i');
+                $(spanEle3).addClass('tree-table-space-block last-block');
+                $(spanEle3).append(iEle2);
+                $(tdEle1).append(spanEle3);
+            } else if (item.children && item.children.length === 0) {
+                var spanEle4 = document.createElement('span');
+                var iEle3 = document.createElement('i');
+                $(spanEle4).addClass('tree-table-space-block btn-toggle expand');
+                $(spanEle4).attr('data-part-level', item.partLevel);
+                $(spanEle4).attr('data-all-level', item.allLevel);
+                $(spanEle4).attr('data-level', item.level);
+                $(spanEle4).attr('data-is-open', '1');
+                $(spanEle4).text('-');
+                $(spanEle4).append(iEle3);
+                $(tdEle1).append(spanEle4);
+            } else if (item.level === 0 && (!item.children || item.children.length === 0)) {
+                var spanEle5 = document.createElement('span');
+                var iEle4 = document.createElement('i');
+                $(spanEle5).addClass('tree-table-space-block last-block');
+                $(spanEle5).append(iEle4);
+                $(tdEle1).append(spanEle5);
+            }
+            var spanEle6 = document.createElement('span');
+            $(spanEle6).addClass('tree-table-td-content');
+            $(spanEle6).text(item.id);
+            $(tdEle1).append(spanEle6);
+
+            var tdEle2 = document.createElement('td');
+            $(tdEle2).css('width', '200px');
+            var spanTd2 = document.createElement('span');
+            $(spanTd2).addClass('tree-table-td-content');
+            $(spanTd2).text(item.from);
+            $(tdEle2).append(spanTd2);
+
+            var tdEle3 = document.createElement('td');
+            $(tdEle3).css('width', '200px');
+            var spanTd3 = document.createElement('span');
+            $(spanTd3).addClass('tree-table-td-content');
+            $(spanTd3).text(item.subject);
+            $(tdEle3).append(spanTd3);
+
+            var tdEle4 = document.createElement('td');
+            $(tdEle4).css('width', '200px');
+            var spanTd4 = document.createElement('span');
+            $(spanTd4).addClass('tree-table-td-content');
+            $(spanTd4).text(item.sentDate);
+            $(tdEle4).append(spanTd4);
+
+            var tdEle5 = document.createElement('td');
+            $(tdEle5).css('width', '200px');
+            var spanTd5 = document.createElement('span');
+            $(spanTd5).addClass('tree-table-td-content');
+            $(spanTd5).text(item.from);
+            $(tdEle5).append(spanTd5);
+
+            $(trEle).append(tdEle1);
+            $(trEle).append(tdEle2);
+            $(trEle).append(tdEle3);
+            $(trEle).append(tdEle4);
+            $(trEle).append(tdEle5);
+            $(fragments).append(trEle);
+        }
+        $('#table-tree').append(fragments);
+    }
+    createRows();
+})($);
