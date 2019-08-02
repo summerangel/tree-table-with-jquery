@@ -172,55 +172,58 @@
         return [].concat(...getChild({ id: undefined }, 0, undefined))
     };
 
-    $(document.body).delegate({
-        '.expand': function () {
-            var level = $(this).attr('data-level');
-            var partLevel = $(this).attr('data-part-level');
-            var allLevel = $(this).attr('data-all-level');
-            var isOpen = $(this).attr('data-is-open');
-            var trsDiv = $('.tree-table').find('tbody tr');
-            var trsArray = $(trsDiv);
-            if (isOpen === '1') {
-                for(var i = 0;i < trsArray.length - 1; i++) {
-                    var tempTr = $(trsArray[i]);
-                    var trLevel = tempTr.attr('data-level');
-                    var trPartLevel = tempTr.attr('data-part-level');
-                    var trAllLevel = tempTr.attr('data-all-level');
-                    var contain = trAllLevel.split('_')[Number(level)]; // 通过循环出来的tr的all_level获取选中等级的id
-                    var curr = partLevel.split('_'); // 通过获取选中的part_level的最后一个元素获取选中等级的id
-                    // 判断是否相等，
-                    if (contain && contain === curr[curr.length - 1] && partLevel !== trPartLevel) {
-                        tempTr.removeClass('show');
-                        tempTr.addClass('hidden');
-                    }
+    $(document.body).delegate('.expand', 'click', function () {
+        var level = $(this).attr('data-level');
+        var partLevel = $(this).attr('data-part-level');
+        var allLevel = $(this).attr('data-all-level');
+        var isOpen = $(this).attr('data-is-open');
+        var trsDiv = $('.tree-table').find('tbody tr');
+        var trsArray = $(trsDiv);
+        if (isOpen === '1') {
+            for(var i = 0;i < trsArray.length - 1; i++) {
+                var tempTr = $(trsArray[i]);
+                var trLevel = tempTr.attr('data-level');
+                var trPartLevel = tempTr.attr('data-part-level');
+                var trAllLevel = tempTr.attr('data-all-level');
+                var contain = trAllLevel.split('_')[Number(level)]; // 通过循环出来的tr的all_level获取选中等级的id
+                var curr = partLevel.split('_'); // 通过获取选中的part_level的最后一个元素获取选中等级的id
+                // 判断是否相等，
+                if (contain && contain === curr[curr.length - 1] && partLevel !== trPartLevel) {
+                    tempTr.removeClass('show');
+                    tempTr.addClass('hidden');
                 }
-                $(this).text('+');
-                $(this).attr('data-is-open', '0');
-            } else {
-                for(var i = 0;i < trsArray.length - 1; i++) {
-                    var tempTr = $(trsArray[i]);
-                    var trLevel = tempTr.attr('data-level');
-                    var trPartLevel = tempTr.attr('data-part-level');
-                    var trAllLevel = tempTr.attr('data-all-level');
-                    var contain = trAllLevel.split('_')[Number(level)]; // 通过循环出来的tr的all_level获取选中等级的id
-                    var curr = partLevel.split('_'); // 通过获取选中的part_level的最后一个元素获取选中等级的id
-                    // 判断是否相等，
-                    if (contain && contain === curr[curr.length - 1] && Number(trLevel) > (Number(level))) {
-                        var span = $(tempTr.children()[0].children[Number(trLevel)]);
-                        var isOpen = $(span).attr('data-is-open');
-                        tempTr.removeClass('hidden');
-                        tempTr.addClass('show');
-                        if (isOpen) {
-                            $(span).text('-');
-                        }
-                    }
-                }
-                $(this).text('-');
-                $(this).attr('data-is-open', '1');
             }
-
+            $(this).text('+');
+            $(this).attr('data-is-open', '0');
+        } else {
+            for(var i = 0;i < trsArray.length - 1; i++) {
+                var tempTr = $(trsArray[i]);
+                var trLevel = tempTr.attr('data-level');
+                var trPartLevel = tempTr.attr('data-part-level');
+                var trAllLevel = tempTr.attr('data-all-level');
+                var contain = trAllLevel.split('_')[Number(level)]; // 通过循环出来的tr的all_level获取选中等级的id
+                var curr = partLevel.split('_'); // 通过获取选中的part_level的最后一个元素获取选中等级的id
+                // 判断是否相等，
+                if (contain && contain === curr[curr.length - 1] && Number(trLevel) > (Number(level))) {
+                    var span = $(tempTr.children()[0].children[Number(trLevel)]);
+                    var isOpen = $(span).attr('data-is-open');
+                    tempTr.removeClass('hidden');
+                    tempTr.addClass('show');
+                    if (isOpen && isOpen === '0') { // 下级折叠状态
+                        $(span).attr('data-is-open', '1');
+                        $(span).text('-');
+                    } else {
+                      if (isOpen === '1') {
+                        // $(span).attr('data-is-open', '1');
+                        // $(span).text('-');
+                      }
+                    }
+                }
+            }
+            $(this).text('-');
+            $(this).attr('data-is-open', '1');
         }
-    })
+    });
 
     function createRows() {
         var fragments = document.createDocumentFragment();
@@ -232,51 +235,32 @@
             $(trEle).attr('data-all-level', item.allLevel);
             $(trEle).attr('data-level', item.level);
             var tdEle1 = document.createElement('td');
-            var spanEle = document.createElement('span');
-            if (item.level === 0 && item.children && item.children.length > 0) {
-                $(spanEle).addClass('tree-table-space-block btn-toggle expand');
+            for (var j =0; j <= item.level; j++) {
+                var spanEle = document.createElement('span');
+                $(spanEle).addClass('tree-table-space-block');
                 $(spanEle).attr('data-part-level', item.partLevel);
                 $(spanEle).attr('data-all-level', item.allLevel);
                 $(spanEle).attr('data-level', item.level);
-                $(spanEle).attr('data-is-open', '1');
-                $(spanEle).text('-');
-                $(tdEle1).append(spanEle);
-            } else if(item.level > 0) {
-                for (var j = 0; j < item.level; j++) {
-                    var spanEle2 = document.createElement('span');
-                    var iEle = document.createElement('i');
-                    $(spanEle2).addClass('tree-table-space-block');
-                    $(spanEle2).append(iEle);
-                    $(tdEle1).append(spanEle2);
+                var iEle = document.createElement('i');
+                if (j === item.level) {
+                    if (item.children && item.children.length > 0) {
+                        $(spanEle).addClass('btn-toggle expand');
+                        $(spanEle).attr('data-is-open', '1');
+                        $(spanEle).text('-');
+                    } else {
+                        $(spanEle).addClass('last-block');
+                        $(spanEle).append(iEle);
+                    }
+                } else {
+                    $(spanEle).append(iEle);
                 }
-            } else if (!item.children || item.children.length === 0) {
-                var spanEle3 = document.createElement('span');
-                var iEle2 = document.createElement('i');
-                $(spanEle3).addClass('tree-table-space-block last-block');
-                $(spanEle3).append(iEle2);
-                $(tdEle1).append(spanEle3);
-            } else if (item.children && item.children.length === 0) {
-                var spanEle4 = document.createElement('span');
-                var iEle3 = document.createElement('i');
-                $(spanEle4).addClass('tree-table-space-block btn-toggle expand');
-                $(spanEle4).attr('data-part-level', item.partLevel);
-                $(spanEle4).attr('data-all-level', item.allLevel);
-                $(spanEle4).attr('data-level', item.level);
-                $(spanEle4).attr('data-is-open', '1');
-                $(spanEle4).text('-');
-                $(spanEle4).append(iEle3);
-                $(tdEle1).append(spanEle4);
-            } else if (item.level === 0 && (!item.children || item.children.length === 0)) {
-                var spanEle5 = document.createElement('span');
-                var iEle4 = document.createElement('i');
-                $(spanEle5).addClass('tree-table-space-block last-block');
-                $(spanEle5).append(iEle4);
-                $(tdEle1).append(spanEle5);
+                $(tdEle1).append(spanEle);
             }
-            var spanEle6 = document.createElement('span');
-            $(spanEle6).addClass('tree-table-td-content');
-            $(spanEle6).text(item.id);
-            $(tdEle1).append(spanEle6);
+
+            var spanEle2 = document.createElement('span');
+            $(spanEle2).addClass('tree-table-td-content');
+            $(spanEle2).text(item.id);
+            $(tdEle1).append(spanEle2);
 
             var tdEle2 = document.createElement('td');
             $(tdEle2).css('width', '200px');
